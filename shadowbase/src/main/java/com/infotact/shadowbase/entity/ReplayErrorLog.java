@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * ReplayErrorLog Entity
+ * 
+ * Maps to the 'replay_error_log' table in shadowbase_admin database.
+ * Stores SQL exceptions thrown by the shadow database during CDC replay.
+ */
 @Entity
 @Table(name = "replay_error_log")
 @Data

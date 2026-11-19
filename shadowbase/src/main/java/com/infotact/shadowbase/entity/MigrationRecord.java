@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * MigrationRecord Entity
+ * 
+ * Maps to the 'migration_record' table in shadowbase_admin database.
+ * Stores migration scripts executed by the developer.
+ */
 @Entity
 @Table(name = "migration_record")
 @Data

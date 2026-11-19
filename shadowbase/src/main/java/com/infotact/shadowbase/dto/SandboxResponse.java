@@ -5,6 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * SandboxResponse DTO
+ * 
+ * Powered by Lombok:
+ * @Data provides getters & setters.
+ * @Builder enables clean fluent object creation: SandboxResponse.builder()...build()
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

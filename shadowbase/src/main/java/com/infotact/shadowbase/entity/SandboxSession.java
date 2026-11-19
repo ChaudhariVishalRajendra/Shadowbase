@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * SandboxSession Entity
+ * 
+ * Maps to the 'sandbox_session' table in shadowbase_admin database.
+ * Tracks each temporary MySQL container run.
+ */
 @Entity
 @Table(name = "sandbox_session")
 @Data
