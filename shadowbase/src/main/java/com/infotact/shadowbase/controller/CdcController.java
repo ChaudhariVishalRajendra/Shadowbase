@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -40,5 +41,15 @@ public class CdcController {
     @GetMapping("/connector/config")
     public ResponseEntity<String> getConnectorConfig() {
         return ResponseEntity.ok(cdcService.getConnectorConfigJson());
+    }
+
+    // GET /api/v1/cdc/topics - Lists expected CDC topics for verification
+    @GetMapping("/topics")
+    public ResponseEntity<List<String>> getCdcTopics() {
+        return ResponseEntity.ok(List.of(
+                "mockserver.sample_shop.customers",
+                "mockserver.sample_shop.orders",
+                "schema-changes.sample_shop"
+        ));
     }
 }
