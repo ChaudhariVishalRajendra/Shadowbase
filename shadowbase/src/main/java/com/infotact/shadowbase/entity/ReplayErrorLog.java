@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * ReplayErrorLog Entity
- * 
- * Maps to the 'replay_error_log' table in shadowbase_admin database.
- * Stores SQL exceptions thrown by the shadow database during CDC replay.
- */
 @Entity
 @Table(name = "replay_error_log")
 @Data
@@ -33,13 +27,13 @@ public class ReplayErrorLog {
     private String targetTable;
 
     @Column(name = "failed_operation", nullable = false, length = 20)
-    private String failedOperation; // "INSERT", "UPDATE", "DELETE"
+    private String failedOperation;
 
     @Column(name = "original_payload", columnDefinition = "TEXT")
     private String originalPayload;
 
     @Column(name = "sql_error_code", length = 50)
-    private String sqlErrorCode; // e.g. "1054"
+    private String sqlErrorCode;
 
     @Column(name = "sql_exception_text", nullable = false, columnDefinition = "TEXT")
     private String sqlExceptionText;
@@ -52,4 +46,3 @@ public class ReplayErrorLog {
         this.occurredAt = LocalDateTime.now();
     }
 }
-

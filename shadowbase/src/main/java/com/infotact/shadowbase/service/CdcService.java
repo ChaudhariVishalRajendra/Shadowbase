@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -23,7 +24,6 @@ public class CdcService {
         this.restTemplate = new RestTemplate();
     }
 
-    // Reads the JSON connector configuration from resources
     public String getConnectorConfigJson() {
         try {
             ClassPathResource resource = new ClassPathResource("debezium/mysql-connector.json");
@@ -36,7 +36,6 @@ public class CdcService {
         }
     }
 
-    // Registers the Debezium MySQL connector via REST API
     public Map<String, Object> registerConnector() {
         String url = DEBEZIUM_BASE_URL + "/connectors";
         String configJson = getConnectorConfigJson();
@@ -66,7 +65,6 @@ public class CdcService {
         }
     }
 
-    // Checks current status of the registered connector
     public Map<String, Object> getConnectorStatus() {
         String url = DEBEZIUM_BASE_URL + "/connectors/mock-mysql-connector/status";
         try {
@@ -81,5 +79,26 @@ public class CdcService {
             result.put("message", "Debezium connector is not active or cluster is offline.");
             return result;
         }
+    }
+
+    public List<Map<String, Object>> getSampleCdcEvents() {
+        List<Map<String, Object>> events = new java.util.ArrayList<>();
+
+        long now = System.currentTimeMillis();
+        events.add(Map.of(
+                "topic", "mockserver.sample_shop.customers",
+                "op", "c",
+                "table", "customers",
+                "ts_ms", now,
+                "after", Map.of("id", 101, "first_name", "Aarav", "last_name", "Sharma", "email", "aarav.sharma@example.com")
+        ));
+        events.add(Map.of(
+                "topic", "mockserver.sample_shop.orders",
+                "op", "c",
+                "table", "orders",
+                "ts_ms", now - 250,
+                "after", Map.of("id", 204, "customer_id", 101, "amount", 1499.50, "status", "COMPLETED")
+        ));
+        return events;
     }
 }

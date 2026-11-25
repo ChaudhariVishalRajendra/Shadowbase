@@ -11,4 +11,3 @@ public interface SandboxSessionRepository extends JpaRepository<SandboxSession, 
 
     Optional<SandboxSession> findFirstByOrderByIdDesc();
 }
-

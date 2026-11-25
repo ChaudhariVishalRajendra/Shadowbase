@@ -22,7 +22,6 @@ public class CdcController {
         this.cdcService = cdcService;
     }
 
-    // POST /api/v1/cdc/connector/register - Registers Debezium connector
     @PostMapping("/connector/register")
     public ResponseEntity<Map<String, Object>> registerConnector() {
         log.info("REST: Triggering Debezium connector registration");
@@ -30,20 +29,17 @@ public class CdcController {
         return ResponseEntity.ok(response);
     }
 
-    // GET /api/v1/cdc/connector/status - Fetches Debezium connector status
     @GetMapping("/connector/status")
     public ResponseEntity<Map<String, Object>> getConnectorStatus() {
         Map<String, Object> status = cdcService.getConnectorStatus();
         return ResponseEntity.ok(status);
     }
 
-    // GET /api/v1/cdc/connector/config - Reads registered JSON configuration
     @GetMapping("/connector/config")
     public ResponseEntity<String> getConnectorConfig() {
         return ResponseEntity.ok(cdcService.getConnectorConfigJson());
     }
 
-    // GET /api/v1/cdc/topics - Lists expected CDC topics for verification
     @GetMapping("/topics")
     public ResponseEntity<List<String>> getCdcTopics() {
         return ResponseEntity.ok(List.of(
@@ -51,5 +47,10 @@ public class CdcController {
                 "mockserver.sample_shop.orders",
                 "schema-changes.sample_shop"
         ));
+    }
+
+    @GetMapping("/events/sample")
+    public ResponseEntity<List<Map<String, Object>>> getSampleCdcEvents() {
+        return ResponseEntity.ok(cdcService.getSampleCdcEvents());
     }
 }

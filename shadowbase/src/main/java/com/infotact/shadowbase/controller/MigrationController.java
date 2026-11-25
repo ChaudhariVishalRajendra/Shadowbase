@@ -24,7 +24,6 @@ public class MigrationController {
         this.migrationService = migrationService;
     }
 
-    // POST /api/v1/migrations/apply - Applies SQL migration directly on the shadow container
     @PostMapping("/apply")
     public ResponseEntity<MigrationApplyResponse> applyMigration(@RequestBody MigrationApplyRequest request) {
         log.info("REST: Received request to apply migration: {}", request.getSql());
@@ -32,7 +31,6 @@ public class MigrationController {
         return ResponseEntity.ok(response);
     }
 
-    // GET /api/v1/migrations/history/{sessionId} - Fetches audit trail of applied migrations
     @GetMapping("/history/{sessionId}")
     public ResponseEntity<List<MigrationRecord>> getHistory(@PathVariable Long sessionId) {
         List<MigrationRecord> history = migrationService.getHistory(sessionId);

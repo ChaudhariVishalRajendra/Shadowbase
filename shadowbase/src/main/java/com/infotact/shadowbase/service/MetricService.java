@@ -25,7 +25,6 @@ public class MetricService {
         this.sessionRepository = sessionRepository;
     }
 
-    // Fetches live/recorded metrics for a specific session ID
     public MetricResponse getMetricsForSession(Long sessionId) {
         log.info("Fetching metrics for session ID: {}", sessionId);
 
@@ -49,7 +48,6 @@ public class MetricService {
                     .build();
         }
 
-        // Clean initial baseline if session is running but no traffic replayed yet
         return MetricResponse.builder()
                 .sessionId(sessionId)
                 .totalQueriesReplayed(0L)
@@ -59,7 +57,6 @@ public class MetricService {
                 .build();
     }
 
-    // Fetches metrics for the most recent active session
     public MetricResponse getLatestMetrics() {
         Optional<SandboxSession> latestSession = sessionRepository.findFirstByOrderByIdDesc();
 

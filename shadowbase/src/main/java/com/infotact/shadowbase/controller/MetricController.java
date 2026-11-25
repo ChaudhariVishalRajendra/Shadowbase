@@ -20,7 +20,6 @@ public class MetricController {
         this.metricService = metricService;
     }
 
-    // GET /api/v1/metrics/{sessionId} - Fetches replay statistics for a session
     @GetMapping("/{sessionId}")
     public ResponseEntity<MetricResponse> getMetricsBySessionId(@PathVariable Long sessionId) {
         log.info("REST: Received request for metrics of session ID: {}", sessionId);
@@ -28,7 +27,6 @@ public class MetricController {
         return ResponseEntity.ok(response);
     }
 
-    // GET /api/v1/metrics/latest - Fetches metrics for the active or latest session
     @GetMapping("/latest")
     public ResponseEntity<MetricResponse> getLatestMetrics() {
         log.info("REST: Received request for latest metrics");

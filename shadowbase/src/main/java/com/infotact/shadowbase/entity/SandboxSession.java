@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * SandboxSession Entity
- * 
- * Maps to the 'sandbox_session' table in shadowbase_admin database.
- * Tracks each temporary MySQL container run.
- */
 @Entity
 @Table(name = "sandbox_session")
 @Data
@@ -36,7 +30,7 @@ public class SandboxSession {
     private Integer mappedPort;
 
     @Column(name = "status", nullable = false, length = 30)
-    private String status; // "INITIALIZING", "RUNNING", "STOPPED", "FAILED"
+    private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -60,5 +54,5 @@ public class SandboxSession {
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
-    
+
 }
