@@ -8,12 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * MetricSnapshot Entity
- * 
- * Maps to the 'metric_snapshot' table in shadowbase_admin database.
- * Periodically stores replayed query counts and error totals for dashboard stats.
- */
 @Entity
 @Table(name = "metric_snapshot")
 @Data
@@ -45,4 +39,3 @@ public class MetricSnapshot {
         if (this.totalErrors == null) this.totalErrors = 0L;
     }
 }
-

@@ -9,9 +9,7 @@ import java.util.Optional;
 @Repository
 public interface MetricSnapshotRepository extends JpaRepository<MetricSnapshot, Long> {
 
-    // Fetches the most recent metric snapshot for a given session
     Optional<MetricSnapshot> findFirstBySessionIdOrderByIdDesc(Long sessionId);
 
-    // Fetches the most recent overall metric snapshot
     Optional<MetricSnapshot> findFirstByOrderByIdDesc();
 }

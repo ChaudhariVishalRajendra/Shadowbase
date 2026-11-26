@@ -16,7 +16,6 @@ public class ContainerService {
 
     private final SandboxSessionRepository sessionRepository;
 
-    // Ephemeral MySQL container instance managed during runtime
     private MySQLContainer<?> activeContainer;
     private SandboxSession currentSession;
 
@@ -25,7 +24,6 @@ public class ContainerService {
         this.sessionRepository = sessionRepository;
     }
 
-    // Helper method to convert entity into response DTO
     public SandboxResponse mapToResponseDto(SandboxSession session, String customMessage) {
         if (session == null) {
             return SandboxResponse.builder()
@@ -48,7 +46,6 @@ public class ContainerService {
                 .build();
     }
 
-    // Starts an isolated MySQL container with baseline schema from db/init.sql
     public synchronized SandboxResponse startSandbox(String sessionName) {
         log.info("Starting new sandbox session: '{}'...", sessionName);
 
@@ -69,7 +66,7 @@ public class ContainerService {
         this.currentSession = session;
 
         try {
-            // Testcontainers starts MySQL and automatically applies db/init.sql
+
             activeContainer = new MySQLContainer<>("mysql:8.0")
                     .withDatabaseName("sample_shop")
                     .withUsername("test")
@@ -101,7 +98,6 @@ public class ContainerService {
         }
     }
 
-    // Stops the container and updates the audit session record
     public synchronized SandboxResponse stopSandbox() {
         if (activeContainer != null && activeContainer.isRunning()) {
             String containerId = activeContainer.getContainerId();

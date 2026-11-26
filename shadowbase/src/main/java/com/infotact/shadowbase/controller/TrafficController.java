@@ -21,7 +21,6 @@ public class TrafficController {
         this.trafficService = trafficService;
     }
 
-    // POST /api/v1/traffic/seed - Seeds initial bulk customer and order records
     @PostMapping("/seed")
     public ResponseEntity<Map<String, Object>> seedInitialData() {
         log.info("REST: Request to seed Mock MySQL with realistic data");
@@ -29,7 +28,6 @@ public class TrafficController {
         return ResponseEntity.ok(result);
     }
 
-    // POST /api/v1/traffic/simulate - Generates on-demand customer transactions
     @PostMapping("/simulate")
     public ResponseEntity<Map<String, Object>> simulateTraffic(@RequestParam(defaultValue = "10") int count) {
         log.info("REST: Simulating {} traffic transactions", count);
@@ -37,7 +35,6 @@ public class TrafficController {
         return ResponseEntity.ok(result);
     }
 
-    // GET /api/v1/traffic/status - Gets live transaction counts from Mock MySQL
     @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getTrafficStatus() {
         Map<String, Object> status = trafficService.getTrafficStatus();

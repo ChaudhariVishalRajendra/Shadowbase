@@ -4,15 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * CorsConfig - Global Cross-Origin Resource Sharing (CORS) Configuration
- * 
- * Why this class exists:
- * In modern full-stack web applications, the frontend (React on port 5173) and 
- * backend (Spring Boot on port 8080) run on different ports (origins).
- * Browsers block requests between different origins for security.
- * This configuration explicitly permits our React Vite frontend to access backend REST APIs.
- */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
@@ -26,4 +17,3 @@ public class CorsConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 }
-

@@ -9,11 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * SandboxController - REST API for Docker Container Management
- * 
- * Powered by Lombok @Slf4j for controller request logging.
- */
 @RestController
 @RequestMapping("/api/v1/sandbox")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -27,10 +22,6 @@ public class SandboxController {
         this.containerService = containerService;
     }
 
-    /**
-     * POST /api/v1/sandbox/start
-     * Starts a new ephemeral MySQL container and seeds baseline schema.
-     */
     @PostMapping("/start")
     public ResponseEntity<SandboxResponse> startSandbox(@RequestBody(required = false) SandboxStartRequest request) {
         String sessionName = (request != null && request.getSessionName() != null)
@@ -49,10 +40,6 @@ public class SandboxController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * POST /api/v1/sandbox/stop
-     * Stops and destroys the active MySQL container.
-     */
     @PostMapping("/stop")
     public ResponseEntity<SandboxResponse> stopSandbox() {
         log.info("API Request: POST /api/v1/sandbox/stop");
@@ -60,10 +47,6 @@ public class SandboxController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * GET /api/v1/sandbox/status
-     * Gets current running status of the sandbox container.
-     */
     @GetMapping("/status")
     public ResponseEntity<SandboxResponse> getStatus() {
         SandboxResponse response = containerService.getStatus();
