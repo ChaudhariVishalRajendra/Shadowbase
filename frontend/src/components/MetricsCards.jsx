@@ -1,14 +1,5 @@
 import React from "react";
 
-/**
- * MetricsCards Component (Week 2 Day 9 Deliverable)
- * 
- * Displays live telemetry from Spring Boot GET /api/v1/metrics/{sessionId}:
- * 1. Total Replayed Traffic Volume (Queries)
- * 2. Real-time Replay Error Rate (%)
- * 3. Target Sandbox Database
- * 4. Active Session State
- */
 export default function MetricsCards({
   metrics = {
     sessionId: null,
@@ -24,7 +15,6 @@ export default function MetricsCards({
 
   return (
     <section className="metrics-grid">
-      {/* Metric 1: Replayed Traffic Volume */}
       <div className="metric-card">
         <div className="metric-title">Captured Traffic Volume</div>
         <div className="metric-value" style={{ color: "#58a6ff" }}>
@@ -38,7 +28,6 @@ export default function MetricsCards({
         </div>
       </div>
 
-      {/* Metric 2: Replay Error Rate */}
       <div className="metric-card">
         <div className="metric-title">Replay Error Rate</div>
         <div
@@ -52,7 +41,6 @@ export default function MetricsCards({
         </div>
       </div>
 
-      {/* Metric 3: Target Database */}
       <div className="metric-card">
         <div className="metric-title">Target Database</div>
         <div className="metric-value" style={{ fontSize: "20px" }}>
@@ -63,7 +51,6 @@ export default function MetricsCards({
         </div>
       </div>
 
-      {/* Metric 4: Session Status */}
       <div className="metric-card">
         <div className="metric-title">Session State</div>
         <div

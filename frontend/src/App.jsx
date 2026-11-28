@@ -9,27 +9,18 @@ import {
   applyMigration,
   seedMockTraffic,
   simulateTraffic,
+  fetchSampleCdcEvents,
 } from "./services/api";
 import "./index.css";
 
-/**
- * App.jsx - ShadowBase (Week 1 Beginner Foundation)
- * 
- * Simple, clean, and honest Week 1 implementation:
- * 1. Verifies connection with Spring Boot backend (GET /api/v1/health).
- * 2. Launches and stops real MySQL 8.0 Docker containers via Testcontainers (POST /api/v1/sandbox/start & /stop).
- * 3. Displays the dynamically mapped MySQL port and seeded database status.
- */
 function App() {
-  // 1. Backend Health State
   const [backendStatus, setBackendStatus] = useState("CHECKING");
   const [backendMessage, setBackendMessage] = useState("");
 
-  // 2. Sandbox Container State (Testcontainers)
   const [sandboxStatus, setSandboxStatus] = useState("IDLE");
   const [containerDetails, setContainerDetails] = useState({
     sessionId: null,
-    sessionName: "Week-1-Sandbox",
+    sessionName: "Sandbox-Session",
     containerId: null,
     mappedPort: null,
     message: "Container is currently idle. Click 'Launch Sandbox' to start.",
@@ -37,7 +28,6 @@ function App() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // 4. CDC Pipeline & Kafka Cluster State (Week 2 Day 8)
   const [cdcStatus, setCdcStatus] = useState("CONFIGURED");
   const [cdcDetails] = useState({
     mockDbPort: "3307",
@@ -47,7 +37,6 @@ function App() {
     cdcTopic: "mockserver.sample_shop.customers",
   });
 
-  // Check Debezium Connect / Kafka cluster status
   const checkCdcCluster = async () => {
     setCdcStatus("CHECKING");
     addLog("Probing Debezium Connect cluster at http://localhost:8083/ ...");
@@ -66,7 +55,6 @@ function App() {
     }
   };
 
-  // 5. Telemetry & Metrics State (Week 2 Day 9)
   const [metrics, setMetrics] = useState({
     sessionId: null,
     totalQueriesReplayed: 0,
@@ -86,14 +74,12 @@ function App() {
     }
   };
 
-  // 6. SQL Migration Script State (Week 2 Day 10-11)
   const [sqlScript, setSqlScript] = useState(
     "-- Safe Additive Migration\nALTER TABLE customers ADD COLUMN phone_number VARCHAR(20) NULL;"
   );
   const [isExecutingMigration, setIsExecutingMigration] = useState(false);
   const [migrationResult, setMigrationResult] = useState(null);
 
-  // Execute DDL Migration onto Sandbox Container (Day 11 Interactive Trigger)
   const handleExecuteMigration = async () => {
     if (sandboxStatus !== "RUNNING") {
       addLog("WARNING: Cannot apply migration. Please launch the sandbox container first.");
@@ -128,7 +114,6 @@ function App() {
     }
   };
 
-  // Register Debezium Connector via Backend REST API
   const handleRegisterConnector = async () => {
     addLog("Sending registration request for Debezium MySQL connector...");
     try {
@@ -144,11 +129,36 @@ function App() {
     }
   };
 
-  // 7. Live Throughput & Traffic Simulation State (Week 2 Day 12)
   const [throughput, setThroughput] = useState(0);
   const [isSimulatingTraffic, setIsSimulatingTraffic] = useState(false);
+  const [isStreamingCdc, setIsStreamingCdc] = useState(false);
 
-  // Seed Mock Production MySQL with 15 customers & 20 orders
+  const handleToggleCdcStream = () => {
+    setIsStreamingCdc((prev) => !prev);
+    addLog(`CDC Live Event Stream toggled: ${!isStreamingCdc ? "ACTIVE (Polling Kafka Topics)" : "PAUSED"}`);
+  };
+
+  useEffect(() => {
+    let interval = null;
+    if (isStreamingCdc) {
+      interval = setInterval(async () => {
+        try {
+          const events = await fetchSampleCdcEvents();
+          if (events && events.length > 0) {
+            events.forEach((ev) => {
+              addLog(`[CDC-EVENT] Topic: ${ev.topic} | OP: ${ev.op} | TABLE: ${ev.table} | AFTER: ${JSON.stringify(ev.after)}`);
+            });
+          }
+        } catch (err) {
+          // Silent catch
+        }
+      }, 3500);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isStreamingCdc]);
+
   const handleSeedTraffic = async () => {
     addLog("Seeding Mock Production MySQL (Port 3307) with realistic customer transactions...");
     try {
@@ -166,7 +176,6 @@ function App() {
     }
   };
 
-  // Generate on-demand streaming transactions (generating binlog events for Debezium)
   const handleSimulateTraffic = async () => {
     setIsSimulatingTraffic(true);
     setThroughput(48);
@@ -189,16 +198,14 @@ function App() {
     }
   };
 
-  // 3. Simple Activity Log
   const [logs, setLogs] = useState([
-    `[${new Date().toLocaleTimeString()}] Frontend initialized. Checking backend connectivity...`,
+    `[${new Date().toLocaleTimeString()}] System dashboard initialized. Ready for operations.`,
   ]);
 
   const addLog = (msg) => {
     setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
   };
 
-  // Check Spring Boot backend health
   const checkHealth = async () => {
     try {
       const res = await fetch("http://localhost:8080/api/v1/health");
@@ -214,7 +221,6 @@ function App() {
     }
   };
 
-  // Launch MySQL container via Testcontainers
   const handleStartContainer = async () => {
     setIsLoading(true);
     setSandboxStatus("STARTING");
@@ -224,7 +230,7 @@ function App() {
       const res = await fetch("http://localhost:8080/api/v1/sandbox/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionName: "Week-1-Session" }),
+        body: JSON.stringify({ sessionName: "Production-Clone-Session" }),
       });
 
       if (!res.ok) throw new Error(`Server returned HTTP ${res.status}`);
@@ -250,7 +256,6 @@ function App() {
     }
   };
 
-  // Stop MySQL container
   const handleStopContainer = async () => {
     setIsLoading(true);
     setSandboxStatus("STOPPING");
@@ -282,7 +287,6 @@ function App() {
     }
   };
 
-  // On initial mount, check health, existing container status, and live telemetry
   useEffect(() => {
     checkHealth();
     refreshMetrics();
@@ -308,13 +312,12 @@ function App() {
 
   return (
     <div className="container">
-      {/* Top Navbar */}
       <header className="navbar">
         <div className="logo-group">
           <span className="logo">🛡️</span>
           <div>
             <h1 className="title">ShadowBase</h1>
-            <p className="subtitle">Week 2: Mock Traffic Seeding & Throughput Graph (Day 12)</p>
+            <p className="subtitle">Zero-Downtime Schema Migration Sandbox</p>
           </div>
         </div>
 
@@ -323,42 +326,37 @@ function App() {
             Backend: {backendStatus}
           </span>
           <span className={`pill ${sandboxStatus === "RUNNING" ? "pill-green" : "pill-gray"}`}>
-            Container: {sandboxStatus}
+            Sandbox: {sandboxStatus}
           </span>
           <span className={`pill ${cdcStatus === "ONLINE" ? "pill-blue" : "pill-gray"}`}>
-            CDC Stack: {cdcStatus}
+            CDC Pipeline: {cdcStatus}
           </span>
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="content">
-        {/* Real-time Telemetry Metrics (Day 9 Deliverable) */}
         <MetricsCards metrics={metrics} targetDatabase="sample_shop" />
 
-        {/* Card 1: Testcontainers Sandbox Control (Week 1 Core) */}
         <div className="card">
           <div className="card-header">
-            <h2 className="card-title">📦 Ephemeral MySQL Container (Testcontainers)</h2>
-            <span className="step-tag">Week 1 Deliverable</span>
+            <h2 className="card-title">📦 Ephemeral MySQL Sandbox (Testcontainers)</h2>
           </div>
 
           <p className="card-desc">
-            This module programmatically spins up an isolated MySQL 8.0 Docker container on demand, 
+            Spins up an isolated MySQL 8.0 Docker container on demand, 
             binds it to a dynamic free port, and seeds the <code>sample_shop</code> baseline schema.
           </p>
 
-          {/* Details Table */}
           <div className="info-grid">
             <div className="info-box">
-              <span className="info-label">CONTAINER STATUS</span>
+              <span className="info-label">SANDBOX STATUS</span>
               <span className={`info-val ${sandboxStatus === "RUNNING" ? "text-green" : "text-gray"}`}>
                 {sandboxStatus}
               </span>
             </div>
 
             <div className="info-box">
-              <span className="info-label">DYNAMIC MAPPED PORT</span>
+              <span className="info-label">DYNAMIC PORT</span>
               <span className="info-val font-mono">
                 {containerDetails.mappedPort ? containerDetails.mappedPort : "Not Bound"}
               </span>
@@ -377,7 +375,6 @@ function App() {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="actions">
             {sandboxStatus !== "RUNNING" ? (
               <button
@@ -404,23 +401,19 @@ function App() {
 
           {containerDetails.message && (
             <div className="status-note">
-              <strong>Status Note:</strong> {containerDetails.message}
+              <strong>Status:</strong> {containerDetails.message}
             </div>
           )}
         </div>
 
-        {/* Card 2: CDC Infrastructure & Kafka Streaming (Week 2 Day 8) */}
         <div className="card">
           <div className="card-header">
             <h2 className="card-title">📡 Mock CDC Pipeline (Kafka & Debezium)</h2>
-            <span className="step-tag" style={{ backgroundColor: "#1f6feb", color: "#ffffff" }}>
-              Day 8 Deliverable
-            </span>
           </div>
 
           <p className="card-desc">
             Orchestrates Mock Production MySQL (Port 3307 with ROW binlog), Zookeeper (2181), 
-            Apache Kafka (9092), and Debezium Connect (8083) via <code>docker-compose.yml</code>.
+            Apache Kafka (9092), and Debezium Connect (8083).
           </p>
 
           <div className="info-grid">
@@ -466,7 +459,6 @@ function App() {
           </div>
         </div>
 
-        {/* Card 3: Monaco SQL Migration Editor (Day 11 Interactive Deliverable) */}
         <MigrationEditor
           sqlScript={sqlScript}
           setSqlScript={setSqlScript}
@@ -477,7 +469,6 @@ function App() {
           executionResult={migrationResult}
         />
 
-        {/* Card 4: CDC Pipeline & Replay Terminal with Live Throughput (Day 12 Deliverable) */}
         <ErrorTerminal
           logs={logs}
           onClearLogs={() => setLogs([])}
@@ -485,12 +476,13 @@ function App() {
           onSeedTraffic={handleSeedTraffic}
           onSimulateTraffic={handleSimulateTraffic}
           isSimulating={isSimulatingTraffic}
+          isStreamingCdc={isStreamingCdc}
+          onToggleCdcStream={handleToggleCdcStream}
         />
       </main>
 
-      {/* Footer */}
       <footer className="footer">
-        Infotact Solutions Internship • ShadowBase Sprint: Week 2 Day 12 Deliverable • Clean Architecture
+        ShadowBase • Zero-Downtime Schema Migration Sandbox • Clean Architecture
       </footer>
     </div>
   );

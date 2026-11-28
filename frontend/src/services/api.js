@@ -187,6 +187,19 @@ export async function getMockTrafficStatus() {
   return response.json();
 }
 
+/**
+ * Fetches sample Debezium CDC change events for live console streaming.
+ * @returns {Promise<Array>}
+ */
+export async function fetchSampleCdcEvents() {
+  const response = await fetch(`${API_BASE_URL}/cdc/events/sample`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch CDC events: HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+
 
 
 

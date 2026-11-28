@@ -1,10 +1,5 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
-/**
- * ErrorTerminal Component (Week 2 Day 12 Deliverable)
- * 
- * Streams real-time container, CDC binlog events, and live throughput graph.
- */
 export default function ErrorTerminal({
   logs = [],
   onClearLogs,
@@ -14,8 +9,11 @@ export default function ErrorTerminal({
   onSeedTraffic,
   onSimulateTraffic,
   isSimulating = false,
+  isStreamingCdc = false,
+  onToggleCdcStream,
 }) {
   const terminalEndRef = useRef(null);
+  const [filter, setFilter] = useState("ALL");
 
   useEffect(() => {
     if (autoScroll && terminalEndRef.current) {
@@ -23,18 +21,30 @@ export default function ErrorTerminal({
     }
   }, [logs, autoScroll]);
 
+  const filteredLogs = logs.filter((logItem) => {
+    const text = typeof logItem === "string" ? logItem : logItem.text || "";
+    if (filter === "ALL") return true;
+    if (filter === "CDC") return text.includes("CDC") || text.includes("Kafka") || text.includes("Debezium");
+    if (filter === "CONTAINER") return text.includes("Container") || text.includes("Docker") || text.includes("Port");
+    if (filter === "MIGRATION") return text.includes("DDL") || text.includes("Migration") || text.includes("ALTER");
+    return true;
+  });
+
   return (
     <div className="card terminal-card">
-      {/* Terminal Header */}
       <div className="card-header">
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <h2 className="card-title">🖥️ CDC Pipeline & Replay Terminal</h2>
-          <span className="step-tag" style={{ backgroundColor: "#238636", color: "#ffffff" }}>
-            Day 12 Live Throughput
-          </span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            className={`btn ${isStreamingCdc ? "btn-danger" : "btn-secondary"}`}
+            style={{ padding: "4px 10px", fontSize: "12px" }}
+            onClick={onToggleCdcStream}
+          >
+            {isStreamingCdc ? "⏸️ Pause Stream" : "▶️ Live CDC Stream"}
+          </button>
           <button
             className="btn btn-secondary"
             style={{ padding: "4px 10px", fontSize: "12px" }}
@@ -61,23 +71,40 @@ export default function ErrorTerminal({
         </div>
       </div>
 
-      {/* Day 12 Deliverable: Live Throughput Graphing Indicator */}
       <div className="throughput-bar">
         <div className="throughput-stat">
-          <span className="live-dot" />
+          <span className={`live-dot ${isStreamingCdc ? "live-dot-pulse" : ""}`} />
           <span className="throughput-label">CDC STREAM RATE:</span>
-          <span className="throughput-value">{throughput > 0 ? `${throughput} events/s` : "IDLE"}</span>
+          <span className="throughput-value">{throughput > 0 ? `${throughput} events/s` : isStreamingCdc ? "12 events/s" : "IDLE"}</span>
         </div>
 
-        {/* Visual Sparkline Graph */}
+        <div style={{ display: "flex", gap: "4px" }}>
+          {["ALL", "CDC", "CONTAINER", "MIGRATION"].map((cat) => (
+            <button
+              key={cat}
+              className={`preset-btn ${filter === cat ? "preset-btn-safe" : ""}`}
+              style={{
+                padding: "2px 8px",
+                fontSize: "10px",
+                backgroundColor: filter === cat ? "#1f6feb" : "#21262d",
+                color: filter === cat ? "#ffffff" : "#8b949e",
+                borderColor: filter === cat ? "#58a6ff" : "#30363d",
+              }}
+              onClick={() => setFilter(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <div className="sparkline-container">
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "70%" : "15%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "90%" : "25%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "60%" : "10%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "100%" : "30%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "80%" : "15%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "95%" : "20%" }} />
-          <div className="sparkline-bar" style={{ height: throughput > 0 ? "75%" : "10%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "70%" : "15%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "90%" : "25%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "60%" : "10%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "100%" : "30%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "80%" : "15%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "95%" : "20%" }} />
+          <div className="sparkline-bar" style={{ height: throughput > 0 || isStreamingCdc ? "75%" : "10%" }} />
         </div>
 
         <label className="toggle-label" style={{ fontSize: "11px", color: "#8b949e" }}>
@@ -91,14 +118,13 @@ export default function ErrorTerminal({
         </label>
       </div>
 
-      {/* Terminal Log Console */}
       <div className="terminal-box">
-        {logs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <div className="empty-terminal-msg">
-            Terminal ready. Click 'Stream 10 Tx' to generate mock traffic through Debezium CDC into Kafka.
+            No events match the '{filter}' filter. Click 'Live CDC Stream' or 'Stream 10 Tx' to see real-time events.
           </div>
         ) : (
-          logs.map((logItem, index) => {
+          filteredLogs.map((logItem, index) => {
             const isText = typeof logItem === "string";
             const text = isText ? logItem : logItem.text || "";
             const isError = text.includes("ERROR") || text.includes("FAILED");
@@ -120,13 +146,12 @@ export default function ErrorTerminal({
         <div ref={terminalEndRef} />
       </div>
 
-      {/* Terminal Footer */}
       <div className="editor-footer" style={{ padding: "6px 0 0" }}>
         <span style={{ fontSize: "11px", color: "#8b949e" }}>
           Pipeline: Mock MySQL (3307) &rarr; Debezium CDC &rarr; Kafka (9092) &rarr; Shadow Sandbox
         </span>
         <span style={{ fontSize: "11px", color: "#8b949e", fontFamily: "monospace" }}>
-          Total Events: {logs.length}
+          Filtered: {filteredLogs.length} / Total: {logs.length}
         </span>
       </div>
     </div>
